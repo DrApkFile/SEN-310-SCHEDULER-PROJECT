@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-fm7rra+pn=m&f5zl*y4dg#qq1obnsbev&i4fn36ucc$(*)9+)$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost', '*']
+
 
 
 # Application definition
@@ -70,8 +71,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'solace_bookings.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+import os
 
 DATABASES = {
     'default': {
@@ -79,6 +79,14 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+if os.environ.get('DATABASE_URL'):
+    try:
+        import dj_database_url
+        DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+    except ImportError:
+        pass
+
 
 
 # Password validation

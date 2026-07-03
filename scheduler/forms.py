@@ -29,27 +29,48 @@ class SignUpForm(UserCreationForm):
         return user
 
 
-class AvailabilityForm(forms.ModelModelForm if hasattr(forms, 'ModelModelForm') else forms.ModelForm):
-    class Meta:
-        model = Availability
-        fields = ['day_of_week', 'start_time', 'end_time']
-        widgets = {
-            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-input'}),
-            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-input'}),
-            'day_of_week': forms.Select(attrs={'class': 'form-input'})
-        }
+class AvailabilityForm(forms.Form):
+    days_of_week = forms.MultipleChoiceField(
+        choices=Availability.DAY_CHOICES,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'days-checkbox-list'}),
+        label="Days of Week",
+        required=True
+    )
+    
+    # 30-minute time intervals from 00:00 to 23:30
+    TIME_CHOICES = [(f"{h:02d}:{m:02d}:00", f"{h:02d}:{m:02d}") for h in range(24) for m in (0, 30)]
+    
+    start_time = forms.ChoiceField(
+        choices=TIME_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        initial='09:00:00'
+    )
+    end_time = forms.ChoiceField(
+        choices=TIME_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        initial='17:00:00'
+    )
 
     def __init__(self, *args, **kwargs):
         self.practitioner = kwargs.pop('practitioner', None)
         super().__init__(*args, **kwargs)
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if self.practitioner:
-            instance.practitioner = self.practitioner
-        if commit:
-            instance.save()
-        return instance
+    def clean(self):
+        cleaned_data = super().clean()
+        start_str = cleaned_data.get('start_time')
+        end_str = cleaned_data.get('end_time')
+        
+        if start_str and end_str:
+            import datetime
+            try:
+                start_t = datetime.datetime.strptime(start_str, '%H:%M:%S').time()
+                end_t = datetime.datetime.strptime(end_str, '%H:%M:%S').time()
+                if start_t >= end_t:
+                    raise forms.ValidationError("Start time must be before end time.")
+            except ValueError:
+                pass
+        return cleaned_data
+
 
 
 class AppointmentForm(forms.ModelForm):

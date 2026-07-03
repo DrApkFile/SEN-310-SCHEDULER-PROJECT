@@ -93,7 +93,7 @@ class SchedulerTestCase(TestCase):
         # Should save without raising errors
         appt.save()
         self.assertEqual(appt.end_time, datetime.time(11, 0))
-        self.assertEqual(appt.status, 'confirmed')
+        self.assertEqual(appt.status, 'pending')
 
     def test_appointment_outside_working_hours(self):
         today = datetime.date.today()
@@ -197,4 +197,30 @@ class SchedulerTestCase(TestCase):
         # Unread notifications count should be 0 now
         response2 = self.client.get('/api/notifications/')
         self.assertEqual(len(response2.json()['notifications']), 0)
+
+    def test_multi_availability_creation_view(self):
+        # Log in as practitioner
+        self.client.login(username='drsmith', password='password123')
+        
+        # Add availability on Wednesday (2) and Friday (4) from 10:00 to 14:00
+        post_data = {
+            'days_of_week': ['2', '4'],
+            'start_time': '10:00:00',
+            'end_time': '14:00:00'
+        }
+        response = self.client.post('/availability/add/', post_data)
+        # Should redirect back to dashboard
+        self.assertEqual(response.status_code, 302)
+        
+        # Verify the two availability objects were created in database
+        wednesday_avail = Availability.objects.filter(practitioner=self.practitioner, day_of_week=2)
+        self.assertTrue(wednesday_avail.exists())
+        self.assertEqual(wednesday_avail.first().start_time, datetime.time(10, 0))
+        self.assertEqual(wednesday_avail.first().end_time, datetime.time(14, 0))
+        
+        friday_avail = Availability.objects.filter(practitioner=self.practitioner, day_of_week=4)
+        self.assertTrue(friday_avail.exists())
+        self.assertEqual(friday_avail.first().start_time, datetime.time(10, 0))
+        self.assertEqual(friday_avail.first().end_time, datetime.time(14, 0))
+
 

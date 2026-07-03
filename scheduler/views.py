@@ -336,20 +336,57 @@ def manage_availability(request):
     practitioner = get_object_or_404(Practitioner, user=request.user)
     
     if request.method == 'POST':
-        form = AvailabilityForm(request.POST, practitioner=practitioner)
+        form = AvailabilityForm(request.POST)
         if form.is_valid():
+            days = form.cleaned_data['days_of_week']
+            start_str = form.cleaned_data['start_time']
+            end_str = form.cleaned_data['end_time']
+            
+            import datetime
             try:
-                form.save()
-                messages.success(request, "Availability block added successfully!")
-            except Exception as e:
-                error_msg = str(e)
-                if hasattr(e, 'messages'):
-                    error_msg = "; ".join(e.messages)
-                messages.error(request, f"Error: {error_msg}")
+                start_t = datetime.datetime.strptime(start_str, '%H:%M:%S').time()
+                end_t = datetime.datetime.strptime(end_str, '%H:%M:%S').time()
+            except ValueError:
+                messages.error(request, "Invalid time format selected.")
+                return redirect('dashboard')
+                
+            success_count = 0
+            errors = []
+            
+            for d in days:
+                try:
+                    day_val = int(d)
+                    # Create slot
+                    avail = Availability(
+                        practitioner=practitioner,
+                        day_of_week=day_val,
+                        start_time=start_t,
+                        end_time=end_t
+                    )
+                    avail.full_clean()  # triggers clean() validation
+                    avail.save()
+                    success_count += 1
+                except Exception as e:
+                    day_name = dict(Availability.DAY_CHOICES).get(int(d), str(d))
+                    error_msg = str(e)
+                    if hasattr(e, 'message_dict'):
+                        error_msg = "; ".join(["; ".join(v) for v in e.message_dict.values()])
+                    elif hasattr(e, 'messages'):
+                        error_msg = "; ".join(e.messages)
+                    errors.append(f"{day_name}: {error_msg}")
+            
+            if success_count > 0:
+                messages.success(request, f"Successfully added {success_count} availability block(s)!")
+            if errors:
+                messages.error(request, "Errors occurred: " + " | ".join(errors))
         else:
-            messages.error(request, "Failed to add availability block. Please review fields.")
+            errors_list = []
+            for field, errs in form.errors.items():
+                errors_list.append(f"{field}: {', '.join(errs)}")
+            messages.error(request, "Validation error: " + " | ".join(errors_list))
             
     return redirect('dashboard')
+
 
 
 @login_required
