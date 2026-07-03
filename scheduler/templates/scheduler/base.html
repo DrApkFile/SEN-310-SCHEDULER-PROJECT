@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Solace Wellness Spot{% endblock %} - Scheduling</title>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <header>
+        <nav class="navbar">
+            <a href="{% url 'landing' %}" class="nav-logo">
+                <span class="logo-gold"><i class="fa-solid fa-spa"></i></span> SOLACE
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="{% url 'landing' %}" class="nav-link">Home</a></li>
+                {% if user.is_authenticated %}
+                {% if user.role == 'client' %}
+                <li><a href="{% url 'dashboard' %}" class="nav-link">My Dashboard</a></li>
+                <li><a href="{% url 'book_appointment' %}" class="nav-link">Book Service</a></li>
+                {% elif user.role == 'practitioner' %}
+                <li><a href="{% url 'dashboard' %}" class="nav-link">Staff Portal</a></li>
+                {% elif user.role == 'admin' or user.is_superuser %}
+                <li><a href="{% url 'manager_dashboard' %}" class="nav-link">Manager Dashboard</a></li>
+                {% endif %}
+                <!-- Notifications Dropdown -->
+                <li style="position: relative;" class="notifications-wrapper">
+                    <a href="javascript:void(0)" class="nav-link" id="notification-bell"
+                        style="display: flex; align-items: center; gap: 0.25rem;">
+                        <i class="fa-regular fa-bell" style="font-size: 1.15rem;"></i>
+                        <span id="unread-notification-count" class="bell-badge"
+                            style="background:#ff6b6b; color:#000; font-size:0.7rem; font-weight:700; padding:0.1rem 0.35rem; border-radius:50%; display:none;">0</span>
+                    </a>
+                    <div id="notification-dropdown" class="card"
+                        style="position: absolute; top: 2.5rem; right: 0; width: 320px; z-index: 1000; padding: 1rem; display: none; background: rgba(18, 26, 22, 0.95); border: 1px solid var(--border); border-radius: 8px;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                            <h4 style="font-size: 0.9rem; margin: 0; color: var(--accent-primary);">Notifications</h4>
+                            <a href="javascript:void(0)" id="mark-all-read-btn"
+                                style="font-size: 0.75rem; color: var(--accent-secondary);">Mark all read</a>
+                        </div>
+                        <div id="notifications-list"
+                            style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 250px; overflow-y: auto;">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin: 1rem 0;">
+                                No new alerts.</p>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary"
+                            style="padding: 0.5rem 1rem; font-size: 0.85rem;">Logout</button>
+                    </form>
+                </li>
+                {% else %}
+                <li><a href="{% url 'login' %}" class="btn btn-secondary">Login</a></li>
+                <li><a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% if messages %}
+    <div class="messages-container" id="alerts">
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+            <span><i
+                    class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+                {{ message }}</span>
+            <button onclick="this.parentElement.remove()"
+                style="background:none; border:none; color:inherit; cursor:pointer;"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        setTimeout(() => {
+            const alerts = document.getElementById('alerts');
+            if (alerts) {
+                alerts.style.transition = 'all 0.5s ease';
+                alerts.style.opacity = '0';
+                setTimeout(() => alerts.remove(), 500);
+            }
+        }, 5000);
+    </script>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; {% now "Y" %} Solace Wellness Spot. All rights reserved. Class Assignment on SEN 310.</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Crafted for peak wellness and sleek operations.</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+
+    {% if user.is_authenticated %}
+    <div class="toast-container" id="toast-alerts-container"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const bell = document.getElementById("notification-bell");
+            const dropdown = document.getElementById("notification-dropdown");
+            const list = document.getElementById("notifications-list");
+            const badge = document.getElementById("unread-notification-count");
+            const readAllBtn = document.getElementById("mark-all-read-btn");
+            const toastContainer = document.getElementById("toast-alerts-container");
+
+            let knownNotificationIds = new Set();
+            let firstLoad = true;
+
+            // Toggle dropdown open/close
+            bell.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const isOpen = dropdown.style.display === "block";
+                dropdown.style.display = isOpen ? "none" : "block";
+            });
+
+            document.addEventListener("click", () => {
+                dropdown.style.display = "none";
+            });
+            dropdown.addEventListener("click", (e) => {
+                e.stopPropagation();
+            });
+
+            // Mark all notifications as read
+            readAllBtn.addEventListener("click", async () => {
+                try {
+                    const response = await fetch("{% url 'mark_notifications_read' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        badge.style.display = "none";
+                        badge.textContent = "0";
+                        list.innerHTML = `<p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin: 1rem 0;">No new alerts.</p>`;
+                    }
+                } catch (err) {
+                    console.error("Error marking read:", err);
+                }
+            });
+
+            function showToast(message) {
+                const toast = document.createElement("div");
+                toast.className = "toast-alert";
+                toast.innerHTML = `
+                    <i class="fa-solid fa-bell" style="color: var(--accent-primary); margin-top: 0.2rem;"></i>
+                    <div style="flex-grow: 1;">
+                        <p style="font-size: 0.85rem; margin: 0; font-weight: 500;">Spa Alert</p>
+                        <p style="font-size: 0.75rem; margin: 0.25rem 0 0 0; color: var(--text-secondary);">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                toastContainer.appendChild(toast);
+
+                // Auto remove after 6 seconds
+                setTimeout(() => {
+                    toast.style.transition = "all 0.5s ease";
+                    toast.style.opacity = "0";
+                    setTimeout(() => toast.remove(), 500);
+                }, 6000);
+            }
+
+            async function fetchNotifications() {
+                try {
+                    const response = await fetch("{% url 'get_notifications_api' %}");
+                    const data = await response.json();
+
+                    if (data.notifications && data.notifications.length > 0) {
+                        badge.style.display = "inline-block";
+                        badge.textContent = data.notifications.length;
+
+                        list.innerHTML = "";
+                        data.notifications.forEach(n => {
+                            const item = document.createElement("div");
+                            item.className = "notification-item";
+                            item.innerHTML = `
+                                <span>${n.message}</span>
+                                <span class="time-stamp">${n.created_at}</span>
+                            `;
+                            list.appendChild(item);
+
+                            // If we discover a new notification ID that we didn't know, trigger toast
+                            if (!knownNotificationIds.has(n.id)) {
+                                knownNotificationIds.add(n.id);
+                                if (!firstLoad) {
+                                    showToast(n.message);
+                                }
+                            }
+                        });
+                    } else {
+                        badge.style.display = "none";
+                        badge.textContent = "0";
+                        list.innerHTML = `<p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin: 1rem 0;">No new alerts.</p>`;
+                    }
+
+                    firstLoad = false;
+                } catch (err) {
+                    console.error("Error fetching notifications:", err);
+                }
+            }
+
+            // Poll every 10 seconds
+            fetchNotifications();
+            setInterval(fetchNotifications, 10000);
+        });
+    </script>
+    {% endif %}
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+{% extends 'scheduler/base.html' %}
+
+{% block title %}Client Dashboard - Solace Wellness Spot{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-user-info">
+        <h2>Hello, {{ user.first_name }}</h2>
+        <p style="color: var(--text-secondary);">Manage your luxury spa appointments and schedule new sessions.</p>
+    </div>
+    <div>
+        <a href="{% url 'book_appointment' %}" class="btn btn-primary"><i class="fa-solid fa-calendar-plus"></i> Book
+            Therapy</a>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div>
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-calendar-check"
+                    style="color: var(--accent-secondary); margin-right: 0.5rem;"></i> Upcoming Treatments</h3>
+
+            {% if upcoming_appointments %}
+            <div class="appointments-list">
+                {% for appt in upcoming_appointments %}
+                <div class="appt-item">
+                    <div class="appt-details">
+                        <h4>{{ appt.service.name }}</h4>
+                        <div class="appt-meta">
+                            <span><i class="fa-solid fa-user-doctor meta-icon-gold"></i> Practitioner: <strong>{{
+                                    appt.practitioner }}</strong></span>
+                            <span><i class="fa-solid fa-calendar-day meta-icon-gold"></i> {{ appt.date }}</span>
+                            <span><i class="fa-solid fa-clock meta-icon-gold"></i> {{ appt.start_time|time:"H:i" }} - {{
+                                appt.end_time|time:"H:i" }}</span>
+                        </div>
+                        {% if appt.notes %}
+                        <p
+                            style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; background: var(--bg-tertiary); padding: 0.5rem; border-radius: 6px; border-left: 2px solid var(--accent-secondary);">
+                            <strong>Notes:</strong> {{ appt.notes }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+                        <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+                        <a href="{% url 'cancel_appointment' appt.id %}" class="btn btn-danger"
+                            style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
+                            onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">No upcoming appointments
+                found. Relax and schedule your first spa treat!</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-history"
+                    style="color: var(--text-muted); margin-right: 0.5rem;"></i> Past & Cancelled Treatments</h3>
+
+            {% if past_appointments %}
+            <div class="appointments-list">
+                {% for appt in past_appointments %}
+                <div class="appt-item" style="opacity: 0.7;">
+                    <div class="appt-details">
+                        <h4 style="color: var(--text-secondary);">{{ appt.service.name }}</h4>
+                        <div class="appt-meta">
+                            <span><i class="fa-solid fa-user-doctor"></i> {{ appt.practitioner }}</span>
+                            <span><i class="fa-solid fa-calendar-day"></i> {{ appt.date }}</span>
+                            <span><i class="fa-solid fa-clock"></i> {{ appt.start_time|time:"H:i" }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-secondary); text-align: center; padding: 2rem 0;">No history recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="card"
+            style="text-align: center; background: linear-gradient(135deg, var(--card-bg) 0%, rgba(141, 163, 153, 0.05) 100%);">
+            <i class="fa-solid fa-spa" style="font-size: 3rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+            <h3>Solace Wellness Spot</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 1rem 0 1.5rem 0;">Our mission is to help
+                you disconnect from stress and reconnect with your inner serenity.</p>
+            <div
+                style="text-align: left; font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 1rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem;">
+                <p><strong>Hours:</strong> Mon - Sun: 9AM - 8PM</p>
+                <p><strong>Support:</strong> (555) 019-9430</p>
+                <p><strong>Email:</strong> care@solacewellness.com</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

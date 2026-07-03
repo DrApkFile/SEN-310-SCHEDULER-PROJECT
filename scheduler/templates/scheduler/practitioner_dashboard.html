@@ -1,0 +1,453 @@
+{% extends 'scheduler/base.html' %}
+
+{% block title %}Staff Portal - {{ practitioner }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --pract-accent: #2dd4bf;
+        --pract-accent-dark: #14b8a6;
+        --pract-bg: rgba(13, 35, 33, 0.6);
+    }
+
+    .pract-header {
+        background: linear-gradient(135deg, rgba(13, 35, 33, 0.9) 0%, rgba(8, 51, 68, 0.85) 100%);
+        border: 1px solid var(--pract-accent);
+        border-radius: 16px;
+        padding: 2rem 2.5rem;
+        margin-bottom: 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .pract-stat-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .pract-stat {
+        background: var(--pract-bg);
+        border: 1px solid var(--pract-accent-dark);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+    }
+
+    .pract-stat-val {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--pract-accent);
+    }
+
+    .pract-stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+
+    .pending-queue {
+        border: 1px solid var(--pract-accent);
+        background: linear-gradient(135deg, rgba(13, 35, 33, 0.7) 0%, rgba(8, 51, 68, 0.6) 100%);
+        border-radius: 14px;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .pending-queue h3 {
+        color: var(--pract-accent);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .pending-item {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(45, 212, 191, 0.2);
+        border-radius: 10px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .pending-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .pending-actions {
+        display: flex;
+        gap: 0.6rem;
+        flex-shrink: 0;
+    }
+
+    .btn-accept {
+        background: rgba(45, 212, 191, 0.15);
+        color: var(--pract-accent);
+        border: 1px solid var(--pract-accent);
+        padding: 0.45rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-accept:hover {
+        background: var(--pract-accent);
+        color: #000;
+    }
+
+    .btn-decline {
+        background: rgba(255, 107, 107, 0.1);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.4);
+        padding: 0.45rem 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-decline:hover {
+        background: #ff6b6b;
+        color: #fff;
+    }
+
+    .btn-complete {
+        background: rgba(100, 200, 100, 0.12);
+        color: #4ade80;
+        border: 1px solid rgba(100, 200, 100, 0.35);
+        padding: 0.35rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-complete:hover {
+        background: #22c55e;
+        color: #000;
+    }
+
+    .section-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-card h3 {
+        margin-bottom: 1.25rem;
+        color: var(--text-primary);
+    }
+
+    .pract-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+        .pract-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pract-stat-row {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    .avail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.9rem;
+        background: rgba(45, 212, 191, 0.07);
+        border: 1px solid rgba(45, 212, 191, 0.2);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .avail-day {
+        font-weight: 600;
+        color: var(--pract-accent);
+        font-size: 0.9rem;
+    }
+
+    .avail-time {
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header Banner -->
+<div class="pract-header">
+    <div>
+        <div
+            style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--pract-accent); margin-bottom: 0.4rem;">
+            <i class="fa-solid fa-stethoscope"></i> Practitioner Portal
+        </div>
+        <h2 style="font-size: 1.8rem; margin: 0; color: var(--text-primary);">{{ practitioner }}</h2>
+        <p style="color: #94a3b8; margin: 0.25rem 0 0 0; font-size: 0.9rem;">
+            {% if practitioner.specialties.all %}
+            {{ practitioner.specialties.all|join:", " }}
+            {% else %}
+            No specialties configured yet
+            {% endif %}
+        </p>
+    </div>
+    <div style="text-align: right; flex-shrink: 0;">
+        {% if pending_count > 0 %}
+        <div
+            style="background: rgba(255,200,0,0.1); border: 1px solid rgba(255,200,0,0.4); border-radius: 10px; padding: 0.75rem 1.25rem; display: inline-block;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #fbbf24;">{{ pending_count }}</div>
+            <div style="font-size: 0.75rem; color: #92400e;">Awaiting Review</div>
+        </div>
+        {% else %}
+        <div
+            style="background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.2); border-radius: 10px; padding: 0.75rem 1.25rem; display: inline-block;">
+            <i class="fa-solid fa-circle-check" style="color: var(--pract-accent); font-size: 1.5rem;"></i>
+            <div style="font-size: 0.75rem; color: var(--pract-accent); margin-top: 0.2rem;">All clear</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="pract-stat-row">
+    <div class="pract-stat">
+        <div class="pract-stat-val" style="color: #fbbf24;">{{ pending_count }}</div>
+        <div class="pract-stat-label">Pending Approval</div>
+    </div>
+    <div class="pract-stat">
+        <div class="pract-stat-val">{{ confirmed_count }}</div>
+        <div class="pract-stat-label">Confirmed Sessions</div>
+    </div>
+    <div class="pract-stat">
+        <div class="pract-stat-val" style="color: #4ade80;">{{ completed_count }}</div>
+        <div class="pract-stat-label">Sessions Completed</div>
+    </div>
+</div>
+
+<div class="pract-grid">
+    <div>
+        <!-- Pending Approval Queue -->
+        <div class="pending-queue">
+            <h3>
+                <i class="fa-solid fa-hourglass-half" style="color: #fbbf24;"></i>
+                Pending Approval
+                {% if pending_count > 0 %}
+                <span
+                    style="background:#fbbf24; color:#000; font-size:0.75rem; padding:0.15rem 0.5rem; border-radius:20px; font-weight:700; margin-left:0.25rem;">{{
+                    pending_count }}</span>
+                {% endif %}
+            </h3>
+            {% if pending_appointments %}
+            {% for appt in pending_appointments %}
+            <div class="pending-item">
+                <div>
+                    <div style="font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 0.4rem;">
+                        {{ appt.service.name }}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                        <span><i class="fa-solid fa-user" style="color: var(--pract-accent);"></i> {{
+                            appt.client.get_full_name|default:appt.client.username }}</span>
+                        <span><i class="fa-solid fa-phone" style="color: var(--pract-accent);"></i> {{
+                            appt.client.phone_number|default:"No phone" }}</span>
+                        <span><i class="fa-solid fa-calendar" style="color: var(--pract-accent);"></i> {{ appt.date
+                            }}</span>
+                        <span><i class="fa-solid fa-clock" style="color: var(--pract-accent);"></i> {{
+                            appt.start_time|time:"H:i" }} – {{ appt.end_time|time:"H:i" }}</span>
+                    </div>
+                    {% if appt.notes %}
+                    <div
+                        style="margin-top: 0.5rem; font-size: 0.8rem; color: #94a3b8; background: rgba(255,255,255,0.04); border-left: 2px solid var(--pract-accent); padding: 0.4rem 0.6rem; border-radius: 0 4px 4px 0;">
+                        <strong>Notes:</strong> {{ appt.notes }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="pending-actions">
+                    <a href="{% url 'accept_appointment' appt.id %}" class="btn-accept"
+                        onclick="return confirm('Accept this booking from {{ appt.client.get_full_name|default:appt.client.username }}?')">
+                        <i class="fa-solid fa-check"></i> Accept
+                    </a>
+                    <a href="{% url 'decline_appointment' appt.id %}" class="btn-decline"
+                        onclick="return confirm('Decline this booking? The client will be notified.')">
+                        <i class="fa-solid fa-xmark"></i> Decline
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.9rem;">
+                <i class="fa-solid fa-inbox"
+                    style="font-size: 2rem; margin-bottom: 0.75rem; display: block; color: var(--pract-accent);"></i>
+                No pending bookings — you're all caught up!
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Upcoming Confirmed Sessions -->
+        <div class="section-card">
+            <h3><i class="fa-solid fa-calendar-check" style="color: var(--pract-accent); margin-right: 0.5rem;"></i>
+                Upcoming Confirmed Sessions</h3>
+            {% if upcoming_appointments %}
+            <div class="appointments-list">
+                {% for appt in upcoming_appointments %}
+                <div class="appt-item" style="border-color: rgba(45,212,191,0.2);">
+                    <div class="appt-details">
+                        <h4>{{ appt.service.name }}</h4>
+                        <div class="appt-meta">
+                            <span><i class="fa-solid fa-user" style="color: var(--pract-accent);"></i> {{
+                                appt.client.get_full_name|default:appt.client.username }}</span>
+                            <span><i class="fa-solid fa-phone" style="color: var(--pract-accent);"></i> {{
+                                appt.client.phone_number|default:"No phone" }}</span>
+                            <span><i class="fa-solid fa-calendar-day" style="color: var(--pract-accent);"></i> {{
+                                appt.date }}</span>
+                            <span><i class="fa-solid fa-clock" style="color: var(--pract-accent);"></i> {{
+                                appt.start_time|time:"H:i" }} – {{ appt.end_time|time:"H:i" }}</span>
+                        </div>
+                        {% if appt.notes %}
+                        <p
+                            style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.4rem; background: rgba(45,212,191,0.06); padding: 0.4rem 0.6rem; border-left: 2px solid var(--pract-accent); border-radius: 0 4px 4px 0;">
+                            {{ appt.notes }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                        <span class="badge badge-confirmed">Confirmed</span>
+                        <a href="{% url 'complete_appointment' appt.id %}" class="btn-complete"
+                            onclick="return confirm('Mark this session as completed?')">
+                            <i class="fa-solid fa-flag-checkered"></i> Complete
+                        </a>
+                        <a href="{% url 'cancel_appointment' appt.id %}" style="color: #ff6b6b; font-size: 0.8rem;"
+                            onclick="return confirm('Cancel this appointment?')">
+                            <i class="fa-solid fa-ban"></i> Cancel
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); text-align: center; padding: 1.5rem 0; font-size: 0.9rem;">No confirmed
+                sessions scheduled.</p>
+            {% endif %}
+        </div>
+
+        <!-- Past / History -->
+        <div class="section-card">
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--text-muted); margin-right: 0.5rem;"></i>
+                Session History</h3>
+            {% if past_appointments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Client</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in past_appointments|slice:":15" %}
+                        <tr style="opacity: 0.75;">
+                            <td><strong>{{ appt.service.name }}</strong></td>
+                            <td>{{ appt.client.get_full_name|default:appt.client.username }}</td>
+                            <td>{{ appt.date }}</td>
+                            <td>{{ appt.start_time|time:"H:i" }}</td>
+                            <td><span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); text-align: center; padding: 1rem 0; font-size: 0.9rem;">No session
+                history yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Sidebar: Availability -->
+    <div>
+        <div class="section-card" style="border-color: rgba(45,212,191,0.25);">
+            <h3 style="color: var(--pract-accent);"><i class="fa-solid fa-calendar-days"
+                    style="margin-right:0.5rem;"></i>Work Hours</h3>
+            {% if availabilities %}
+            <div style="margin-bottom: 1.25rem;">
+                {% for avail in availabilities %}
+                <div class="avail-item">
+                    <div>
+                        <div class="avail-day">{{ avail.get_day_of_week_display }}</div>
+                        <div class="avail-time">{{ avail.start_time|time:"H:i" }} – {{ avail.end_time|time:"H:i" }}
+                        </div>
+                    </div>
+                    <a href="{% url 'delete_availability' avail.id %}" style="color: #ff6b6b; font-size: 0.9rem;"
+                        onclick="return confirm('Remove this availability block?')">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+                <i class="fa-solid fa-triangle-exclamation" style="color: #fbbf24;"></i>
+                No availability set — clients cannot book you until you add working hours.
+            </p>
+            {% endif %}
+
+            <div style="border-top: 1px solid rgba(45,212,191,0.2); padding-top: 1.25rem;">
+                <h4 style="font-size: 0.9rem; color: var(--pract-accent); margin-bottom: 1rem;">Add Availability Block
+                </h4>
+                <form action="{% url 'manage_availability' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label style="font-size: 0.82rem;">Day of Week</label>
+                        {{ availability_form.day_of_week }}
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;" class="form-group">
+                        <div>
+                            <label style="font-size: 0.82rem;">Start</label>
+                            {{ availability_form.start_time }}
+                        </div>
+                        <div>
+                            <label style="font-size: 0.82rem;">End</label>
+                            {{ availability_form.end_time }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"
+                        style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background: var(--pract-accent); border-color: var(--pract-accent); color: #000;">
+                        <i class="fa-solid fa-plus"></i> Add Block
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.card form select, .card form input, .section-card form select, .section-card form input').forEach(el => {
+        el.classList.add('form-input');
+        if (el.tagName === 'INPUT') el.style.padding = '0.5rem';
+    });
+</script>
+{% endblock %}

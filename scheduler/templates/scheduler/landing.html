@@ -1,0 +1,115 @@
+{% extends 'scheduler/base.html' %}
+{% load static %}
+
+{% block title %}Welcome - Solace Wellness Spot{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-text">
+        <h1>Renew Your Mind, <br><span>Reclaim Your Solace</span></h1>
+        <p>Experience personalized wellness treatments designed to restore balance, soothe muscles, and invite peaceful
+            energy into your life.</p>
+        <div style="display: flex; gap: 1rem;">
+            {% if user.is_authenticated %}
+            {% if user.role == 'client' %}
+            <a href="{% url 'book_appointment' %}" class="btn btn-primary"><i class="fa-solid fa-calendar-days"></i>
+                Book Reservation</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Go to Dashboard</a>
+            {% else %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to portal</a>
+            {% endif %}
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Get Started</a>
+            <a href="#services" class="btn btn-secondary">View Services</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-image-wrap">
+        <div class="hero-circle">
+            <svg width="220" height="220" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"
+                style="opacity: 0.85;">
+                <path
+                    d="M50 15C50 15 32 38 32 55C32 64.9411 40.0589 73 50 73C59.9411 73 68 64.9411 68 55C68 38 50 15 50 15Z"
+                    fill="url(#spaGradient)" />
+                <path
+                    d="M50 25C50 25 38 43 38 55C38 61.6274 43.3726 67 50 67C56.6274 67 62 61.6274 62 55C62 43 50 25 50 25Z"
+                    fill="#121a16" fill-opacity="0.3" />
+                <circle cx="50" cy="55" r="4" fill="#d4af37" />
+                <defs>
+                    <linearGradient id="spaGradient" x1="50" y1="15" x2="50" y2="73" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#d4af37" />
+                        <stop offset="1" stop-color="#8da399" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="hero-badge">
+                <p style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;"><i
+                        class="fa-solid fa-certificate"></i> Premium Care</p>
+                <p style="font-size: 0.75rem; color: var(--text-secondary);">100% Certified Professionals</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="services" style="padding-top: 5rem;">
+    <h2 class="section-title">Our Premium Services</h2>
+    <p class="section-subtitle">Select card to begin booking or view prices and sessions. We provide an oasis of premium
+        wellness therapies tailored specifically to your body's needs.</p>
+
+    <div class="services-grid">
+        {% for service in services %}
+        <div class="card service-card">
+            <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem; color: var(--text-primary);">{{ service.name }}</h3>
+            <div class="service-meta">
+                <span><i class="fa-solid fa-clock"></i> {{ service.duration_minutes }} minutes</span>
+                <span>&bull;</span>
+                <span><i class="fa-solid fa-circle-info"></i> Licensed Practitioners</span>
+            </div>
+            <p>{{ service.description }}</p>
+            <div class="service-price">
+                ${{ service.price }}
+            </div>
+            {% if user.is_authenticated and user.role == 'client' %}
+            <a href="{% url 'book_appointment' %}?service={{ service.id }}" class="btn btn-secondary"
+                style="margin-top: auto; padding: 0.6rem 0.5rem;">Book This Service</a>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-secondary"
+                style="margin-top: auto; padding: 0.6rem 0.5rem;">Register to Book</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section style="padding: 8rem 0 3rem 0; text-align: center;">
+    <div class="card"
+        style="max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, rgba(18, 26, 22, 0.9) 0%, rgba(10, 15, 13, 0.9) 100%);">
+        <h2 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--accent-primary);">Why Solace Wellness Spot?</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.05rem;">We provide a sanctuary where
+            modern clinical expertise meets luxurious relaxation. Our practitioners are hand-selected, verified
+            Specialists in Massage Therapy, Acupuncture, and Holistic Aesthetics.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+            <div>
+                <i class="fa-solid fa-clock-rotate-left"
+                    style="font-size: 2rem; color: var(--accent-secondary); margin-bottom: 0.75rem;"></i>
+                <h4 style="margin-bottom: 0.25rem;">Flexible Hours</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Book at times matching your custom schedule.
+                </p>
+            </div>
+            <div>
+                <i class="fa-solid fa-shield-halved"
+                    style="font-size: 2rem; color: var(--accent-secondary); margin-bottom: 0.75rem;"></i>
+                <h4 style="margin-bottom: 0.25rem;">Secure & Private</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">All appointments and personal records remain
+                    strictly confidential.</p>
+            </div>
+            <div>
+                <i class="fa-solid fa-award"
+                    style="font-size: 2rem; color: var(--accent-secondary); margin-bottom: 0.75rem;"></i>
+                <h4 style="margin-bottom: 0.25rem;">Top Quality</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Highly-credentialed and warm natured staff.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

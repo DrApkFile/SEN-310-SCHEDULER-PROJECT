@@ -1,0 +1,293 @@
+{% extends 'scheduler/base.html' %}
+
+{% block title %}Book Treatment - Solace Wellness Spot{% endblock %}
+
+{% block content %}
+<div class="card form-card" style="max-width: 650px;">
+    <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; text-align: center; color: var(--accent-primary);"><i
+            class="fa-solid fa-calendar-plus"></i> Book Wellness Treatment</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">Select your
+        service, choose a practitioner, and schedule a tailored session.</p>
+
+    {% if not has_practitioners %}
+    <!-- Empty state: no practitioners registered yet -->
+    <div
+        style="text-align: center; padding: 2.5rem 1rem; border: 1px dashed var(--border); border-radius: 12px; background: rgba(141,163,153,0.04);">
+        <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--text-muted);">
+            <i class="fa-solid fa-user-slash"></i>
+        </div>
+        <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No Practitioners Available</h3>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; max-width: 380px; margin: 0 auto 1.5rem auto;">
+            There are currently no practitioners registered on the platform. Please check back soon or contact the spa
+            directly.
+        </p>
+        <a href="{% url 'landing' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    {% else %}
+
+    <form method="post" id="booking-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="margin-bottom: 1.5rem; position: static; max-width: 100%;">
+            <span><i class="fa-solid fa-circle-exclamation"></i> {{ form.non_field_errors.0 }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Inline global validation banner (shown by JS on submit attempt) -->
+        <div id="validation-banner" style="display: none;" class="alert alert-danger"
+            style="margin-bottom: 1.5rem; position: static; max-width: 100%;">
+            <span><i class="fa-solid fa-triangle-exclamation"></i> <span id="validation-banner-msg">Please complete all
+                    required fields before confirming.</span></span>
+        </div>
+
+        <div class="form-group">
+            <label for="booking-service">Service <span style="color:#ff6b6b;">*</span></label>
+            {{ form.service }}
+            {% if form.service.errors %}
+            <p class="field-error">{{ form.service.errors.0 }}</p>
+            {% endif %}
+            <p class="field-error" id="err-service" style="display:none;">Please select a service.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="booking-practitioner">Practitioner <span style="color:#ff6b6b;">*</span></label>
+            {{ form.practitioner }}
+            {% if form.practitioner.errors %}
+            <p class="field-error">{{ form.practitioner.errors.0 }}</p>
+            {% endif %}
+            <p class="field-error" id="err-practitioner" style="display:none;">Please select a practitioner.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="booking-date">Date <span style="color:#ff6b6b;">*</span></label>
+            {{ form.date }}
+            {% if form.date.errors %}
+            <p class="field-error">{{ form.date.errors.0 }}</p>
+            {% endif %}
+            <p class="field-error" id="err-date" style="display:none;">Please pick a valid date.</p>
+        </div>
+
+        <!-- Hidden input for standard form POST submission -->
+        <input type="hidden" name="start_time" id="selected-start-time" value="{{ form.start_time.value|default:'' }}">
+
+        <div class="form-group" id="slots-section" style="display: none;">
+            <label>Available Timeslots <span style="color:#ff6b6b;">*</span></label>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Select an available session
+                slot:</p>
+            <div class="slots-container" id="slots-list">
+                <!-- Loaded dynamically via JS -->
+            </div>
+            {% if form.start_time.errors %}
+            <p class="field-error">{{ form.start_time.errors.0 }}</p>
+            {% endif %}
+            <p class="field-error" id="err-slot" style="display:none;">Please select a time slot above.</p>
+        </div>
+
+        <div class="form-group" id="no-slots-alert"
+            style="display: none; border: 1px solid rgba(220, 53, 69, 0.2); background: rgba(220, 53, 69, 0.05); padding: 0.75rem; border-radius: 8px;">
+            <p style="color: #ff6b6b; font-size: 0.9rem;" id="slots-error-msg"><i
+                    class="fa-solid fa-circle-exclamation"></i> No available timeslots for the selected practitioner and
+                date.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="id_notes">Special Requests / Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <p class="field-error">{{ form.notes.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Loading spinner shown during slot fetch -->
+        <div id="slots-loading"
+            style="display:none; text-align:center; padding: 0.75rem; color: var(--text-muted); font-size:0.9rem;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Fetching available slots…
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="submit-booking"
+            disabled>
+            <i class="fa-solid fa-check-circle"></i> Confirm Reservation
+        </button>
+
+        <p style="text-align:center; font-size:0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+            <i class="fa-solid fa-lock" style="font-size:0.7rem;"></i> Fields marked <span
+                style="color:#ff6b6b;">*</span> are required.
+        </p>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if has_practitioners %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const serviceSelect = document.getElementById("booking-service");
+        const practitionerSelect = document.getElementById("booking-practitioner");
+        const dateInput = document.getElementById("booking-date");
+        const timeInput = document.getElementById("selected-start-time");
+        const slotsSection = document.getElementById("slots-section");
+        const slotsList = document.getElementById("slots-list");
+        const noSlotsAlert = document.getElementById("no-slots-alert");
+        const slotsErrorMsg = document.getElementById("slots-error-msg");
+        const submitBtn = document.getElementById("submit-booking");
+        const slotsLoading = document.getElementById("slots-loading");
+        const validationBanner = document.getElementById("validation-banner");
+        const validationBannerMsg = document.getElementById("validation-banner-msg");
+
+        // Format raw inputs
+        [serviceSelect, practitionerSelect, dateInput].forEach(el => {
+            el.classList.add('form-input');
+        });
+
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+
+        // Prepopulate from GET params
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceParam = urlParams.get('service');
+        if (serviceParam) {
+            serviceSelect.value = serviceParam;
+        }
+
+        function clearFieldErrors() {
+            ["err-service", "err-practitioner", "err-date", "err-slot"].forEach(id => {
+                document.getElementById(id).style.display = "none";
+            });
+            validationBanner.style.display = "none";
+        }
+
+        function highlightField(selectEl) {
+            selectEl.style.borderColor = "#ff6b6b";
+            selectEl.style.boxShadow = "0 0 8px rgba(220,53,69,0.2)";
+        }
+        function clearHighlight(selectEl) {
+            selectEl.style.borderColor = "";
+            selectEl.style.boxShadow = "";
+        }
+
+        async function fetchAvailableSlots() {
+            const serviceId = serviceSelect.value;
+            const practitionerId = practitionerSelect.value;
+            const dateVal = dateInput.value;
+
+            // Reset time selection & UI
+            timeInput.value = "";
+            submitBtn.disabled = true;
+            slotsList.innerHTML = "";
+            slotsSection.style.display = "none";
+            noSlotsAlert.style.display = "none";
+            slotsLoading.style.display = "none";
+
+            if (!serviceId || !practitionerId || !dateVal) {
+                return;
+            }
+
+            slotsLoading.style.display = "block";
+
+            try {
+                const response = await fetch(`/api/slots/?service=${serviceId}&practitioner=${practitionerId}&date=${dateVal}`);
+                const data = await response.json();
+                slotsLoading.style.display = "none";
+
+                if (data.error) {
+                    noSlotsAlert.style.display = "block";
+                    slotsErrorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${data.error}`;
+                } else if (data.slots && data.slots.length > 0) {
+                    slotsSection.style.display = "block";
+
+                    data.slots.forEach(slot => {
+                        const slotBtn = document.createElement("button");
+                        slotBtn.type = "button";
+                        slotBtn.className = "slot-btn";
+                        slotBtn.textContent = slot;
+
+                        if (slot === timeInput.value) {
+                            slotBtn.classList.add("selected");
+                            submitBtn.disabled = false;
+                        }
+
+                        slotBtn.addEventListener("click", () => {
+                            document.querySelectorAll(".slot-btn").forEach(btn => btn.classList.remove("selected"));
+                            slotBtn.classList.add("selected");
+                            timeInput.value = slot;
+                            submitBtn.disabled = false;
+                            clearFieldErrors();
+                        });
+
+                        slotsList.appendChild(slotBtn);
+                    });
+                } else {
+                    noSlotsAlert.style.display = "block";
+                    slotsErrorMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> The practitioner has no scheduled availability or is fully booked on this day.`;
+                }
+            } catch (err) {
+                slotsLoading.style.display = "none";
+                console.error("Error fetching slots:", err);
+            }
+        }
+
+        // Run fetch on changes
+        serviceSelect.addEventListener("change", () => { clearHighlight(serviceSelect); fetchAvailableSlots(); });
+        practitionerSelect.addEventListener("change", () => { clearHighlight(practitionerSelect); fetchAvailableSlots(); });
+        dateInput.addEventListener("change", () => { clearHighlight(dateInput); fetchAvailableSlots(); });
+
+        // Pre-submit validation before allowing the POST
+        document.getElementById("booking-form").addEventListener("submit", (e) => {
+            let hasError = false;
+            clearFieldErrors();
+
+            if (!serviceSelect.value) {
+                document.getElementById("err-service").style.display = "block";
+                highlightField(serviceSelect);
+                hasError = true;
+            }
+            if (!practitionerSelect.value) {
+                document.getElementById("err-practitioner").style.display = "block";
+                highlightField(practitionerSelect);
+                hasError = true;
+            }
+            if (!dateInput.value) {
+                document.getElementById("err-date").style.display = "block";
+                highlightField(dateInput);
+                hasError = true;
+            }
+            if (!timeInput.value) {
+                const slotErr = document.getElementById("err-slot");
+                slotErr.style.display = "block";
+                slotsSection.style.display = "block";
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                validationBannerMsg.textContent = "Please complete all required fields before confirming.";
+                validationBanner.style.display = "flex";
+                validationBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        });
+
+        // Run initially in case of prepopulations
+        if (serviceSelect.value && practitionerSelect.value && dateInput.value) {
+            fetchAvailableSlots();
+        }
+    });
+</script>
+
+<style>
+    .field-error {
+        color: #ff6b6b;
+        font-size: 0.82rem;
+        margin-top: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+</style>
+{% endif %}
+{% endblock %}
