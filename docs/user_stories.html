@@ -1,0 +1,261 @@
+<title>Solace User Stories</title>
+<style>
+  :root {
+    --paper: #f5f7f4;
+    --surface: #ffffff;
+    --ink: #16211c;
+    --ink-soft: #4c5a53;
+    --ink-faint: #7c887f;
+    --gold: #96731a;
+    --sage: #3f6455;
+    --line: #dde2dc;
+    --plate-line: #cfd6cd;
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: 'Avenir Next', 'Century Gothic', 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0c1210;
+      --surface: #141c18;
+      --ink: #eef1ee;
+      --ink-soft: #a7b3ac;
+      --ink-faint: #78857e;
+      --gold: #d4af37;
+      --sage: #8da399;
+      --line: rgba(141, 163, 153, 0.18);
+      --plate-line: rgba(141, 163, 153, 0.28);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0c1210;
+    --surface: #141c18;
+    --ink: #eef1ee;
+    --ink-soft: #a7b3ac;
+    --ink-faint: #78857e;
+    --gold: #d4af37;
+    --sage: #8da399;
+    --line: rgba(141, 163, 153, 0.18);
+    --plate-line: rgba(141, 163, 153, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); line-height: 1.7; font-size: 16px; }
+
+  .page { max-width: 780px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+
+  .eyebrow { font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+
+  header.cover { padding-bottom: 2rem; margin-bottom: 2.75rem; border-bottom: 1px solid var(--line); }
+
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.9rem, 1.5rem + 1.4vw, 2.5rem); margin: 0.5rem 0 0.6rem; text-wrap: balance; color: var(--ink); }
+
+  .dek { font-size: 1.05rem; color: var(--ink-soft); max-width: 60ch; margin: 0 0 1.75rem; }
+
+  .meta-row { display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.82rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+  .meta-item .label { text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); font-size: 0.68rem; }
+  .meta-item .value { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 2.75rem; }
+
+  h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; margin: 0 0 0.3rem; color: var(--ink); }
+  .section-eyebrow { display: block; margin-bottom: 0.35rem; }
+  h2 + .rule { height: 1px; background: linear-gradient(to right, var(--gold), var(--line) 40%); margin: 0.6rem 0 1.1rem; }
+
+  p { color: var(--ink-soft); margin: 0 0 1rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .role-block { margin-bottom: 2.25rem; }
+  .role-block:last-child { margin-bottom: 0; }
+
+  .role-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .role-heading h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--sage);
+    margin: 0;
+  }
+  .role-heading .count {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .story-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+  .story-card {
+    background: var(--surface);
+    border: 1px solid var(--plate-line);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 0.95rem 1.15rem;
+  }
+
+  .story-id {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .story-text {
+    font-size: 0.96rem;
+    color: var(--ink);
+    margin: 0 0 0.55rem;
+  }
+  .story-text strong { color: var(--sage); font-weight: 600; }
+
+  .acceptance {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  .acceptance li { margin-bottom: 0.2rem; }
+  .acceptance li:last-child { margin-bottom: 0; }
+
+  footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--ink-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media print {
+    body { background: #ffffff !important; color: #16211c !important; }
+    .story-card { break-inside: avoid; border-color: #ccc !important; border-left-color: #96731a !important; }
+    .page { padding: 0 0.25in; max-width: 100%; }
+  }
+</style>
+
+<div class="page">
+  <header class="cover">
+    <span class="eyebrow">SEN 310 &middot; Software Engineering &middot; Requirements</span>
+    <h1>Solace User Stories</h1>
+    <p class="dek">Functional requirements for the Solace Wellness Spot scheduler, written from the perspective of each of its three user roles.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="label">Project</span><span class="value">Solace Wellness Spot Scheduler</span></div>
+      <div class="meta-item"><span class="label">Document</span><span class="value">User Stories</span></div>
+      <div class="meta-item"><span class="label">Roles Covered</span><span class="value">3</span></div>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Overview</span>
+    <h2>Project Description</h2>
+    <div class="rule"></div>
+    <p>Solace Wellness Spot Scheduler is a Django web application that manages appointment booking for a wellness spa offering massage, acupuncture, facials, and yoga sessions. It serves three roles &mdash; <strong>Client</strong>, <strong>Practitioner</strong>, and <strong>Admin/Manager</strong> &mdash; each with its own dashboard and permissions. The stories below capture what each role needs to accomplish, in the order a real user would encounter them: discovering services, booking and managing appointments, and running the business behind the scenes.</p>
+  </section>
+
+  <section>
+    <div class="role-block">
+      <div class="role-heading"><h3>Client</h3><span class="count">7 stories</span></div>
+      <div class="story-list">
+        <div class="story-card">
+          <span class="story-id">CLIENT-01</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to create an account, so that I can book spa services online.</p>
+          <ul class="acceptance">
+            <li>Registration requires username, email, password, and contact details.</li>
+            <li>A successful signup logs the user in immediately and lands them on their dashboard.</li>
+          </ul>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-02</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to browse available services with descriptions, duration, and pricing, so that I can decide what to book.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-03</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to see only the time slots a practitioner is actually free for, so that I never request a time that will be rejected.</p>
+          <ul class="acceptance">
+            <li>Slots are generated in 30-minute increments from the practitioner's declared availability.</li>
+            <li>Past times and already-booked slots are excluded automatically.</li>
+          </ul>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-04</span>
+          <p class="story-text">As a <strong>Client</strong>, I want a confirmation message and email when I submit a booking, so that I know my request went through.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-05</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to see my upcoming and past appointments in one place, so that I can keep track of my visits.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-06</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to cancel an upcoming appointment, so that I can free the slot if my plans change.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">CLIENT-07</span>
+          <p class="story-text">As a <strong>Client</strong>, I want to be notified the moment a practitioner accepts, declines, or cancels my booking, so that I'm never left guessing about my appointment's status.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-block">
+      <div class="role-heading"><h3>Practitioner</h3><span class="count">6 stories</span></div>
+      <div class="story-list">
+        <div class="story-card">
+          <span class="story-id">PRACT-01</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want to set my recurring weekly working hours, so that clients can only request times I'm actually available.</p>
+          <ul class="acceptance">
+            <li>Overlapping availability blocks on the same day are rejected.</li>
+            <li>Start time must be before end time.</li>
+          </ul>
+        </div>
+        <div class="story-card">
+          <span class="story-id">PRACT-02</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want to see pending booking requests separately from confirmed ones, so that I know what needs my response.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">PRACT-03</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want to accept or decline a pending request with one click, so that clients get a fast answer.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">PRACT-04</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want to mark a confirmed appointment as completed, so that my history and the manager's reports stay accurate.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">PRACT-05</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want to cancel a confirmed appointment if I become unavailable, so that the client is notified and can rebook elsewhere.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">PRACT-06</span>
+          <p class="story-text">As a <strong>Practitioner</strong>, I want a running count of my pending, confirmed, and completed appointments, so that I can gauge my workload at a glance.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="role-block">
+      <div class="role-heading"><h3>Admin / Manager</h3><span class="count">4 stories</span></div>
+      <div class="story-list">
+        <div class="story-card">
+          <span class="story-id">ADMIN-01</span>
+          <p class="story-text">As an <strong>Admin</strong>, I want a dashboard of total appointments, revenue, and status breakdowns, so that I can monitor how the business is performing.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">ADMIN-02</span>
+          <p class="story-text">As an <strong>Admin</strong>, I want to see which services are booked most often, so that I can plan staffing and promotions around demand.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">ADMIN-03</span>
+          <p class="story-text">As an <strong>Admin</strong>, I want to create new practitioner accounts and assign their specialties, so that I can onboard new staff without touching the database directly.</p>
+        </div>
+        <div class="story-card">
+          <span class="story-id">ADMIN-04</span>
+          <p class="story-text">As an <strong>Admin</strong>, I want to view every appointment across all practitioners, so that I have full operational oversight.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Solace Wellness Spot &mdash; Scheduling System</span>
+    <span>User Stories</span>
+  </footer>
+</div>

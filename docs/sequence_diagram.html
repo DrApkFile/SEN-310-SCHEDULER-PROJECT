@@ -1,0 +1,229 @@
+<title>Solace Booking Sequence</title>
+<style>
+  :root {
+    --paper: #f5f7f4;
+    --surface: #ffffff;
+    --ink: #16211c;
+    --ink-soft: #4c5a53;
+    --ink-faint: #7c887f;
+    --gold: #96731a;
+    --sage: #3f6455;
+    --line: #dde2dc;
+    --plate-line: #cfd6cd;
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: 'Avenir Next', 'Century Gothic', 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0c1210;
+      --surface: #141c18;
+      --ink: #eef1ee;
+      --ink-soft: #a7b3ac;
+      --ink-faint: #78857e;
+      --gold: #d4af37;
+      --sage: #8da399;
+      --line: rgba(141, 163, 153, 0.18);
+      --plate-line: rgba(141, 163, 153, 0.28);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0c1210;
+    --surface: #141c18;
+    --ink: #eef1ee;
+    --ink-soft: #a7b3ac;
+    --ink-faint: #78857e;
+    --gold: #d4af37;
+    --sage: #8da399;
+    --line: rgba(141, 163, 153, 0.18);
+    --plate-line: rgba(141, 163, 153, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .page { max-width: 780px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  header.cover { padding-bottom: 2rem; margin-bottom: 2.75rem; border-bottom: 1px solid var(--line); }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 1.5rem + 1.4vw, 2.5rem);
+    margin: 0.5rem 0 0.6rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .dek { font-size: 1.05rem; color: var(--ink-soft); max-width: 60ch; margin: 0 0 1.75rem; }
+
+  .meta-row { display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.82rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+  .meta-item .label { text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); font-size: 0.68rem; }
+  .meta-item .value { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 2.75rem; }
+
+  h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; margin: 0 0 0.3rem; color: var(--ink); }
+  .section-eyebrow { display: block; margin-bottom: 0.35rem; }
+  h2 + .rule { height: 1px; background: linear-gradient(to right, var(--gold), var(--line) 40%); margin: 0.6rem 0 1.1rem; }
+
+  p { color: var(--ink-soft); margin: 0 0 1rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+  .legend-item {
+    background: var(--surface);
+    border: 1px solid var(--plate-line);
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  .legend-item .role { font-family: var(--font-mono); color: var(--sage); display: block; margin-bottom: 0.15rem; }
+
+  .plate { background: var(--surface); border: 1px solid var(--plate-line); border-radius: 8px; padding: 1.5rem; overflow-x: auto; }
+  .plate pre.mermaid { margin: 0; }
+
+  figcaption { font-size: 0.85rem; font-style: italic; color: var(--ink-faint); margin-top: 0.6rem; text-align: center; }
+
+  ol.flow-notes { color: var(--ink-soft); padding-left: 1.2rem; margin: 0; }
+  ol.flow-notes li { margin-bottom: 0.5rem; }
+
+  footer {
+    margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+    font-size: 0.78rem; color: var(--ink-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+  }
+
+  @media print {
+    body { background: #ffffff !important; color: #16211c !important; }
+    .plate, .legend-item { break-inside: avoid; border-color: #ccc !important; }
+    .page { padding: 0 0.25in; max-width: 100%; }
+  }
+</style>
+
+<div class="page">
+  <header class="cover">
+    <span class="eyebrow">SEN 310 &middot; Software Engineering &middot; UML Diagram</span>
+    <h1>Solace Booking Sequence</h1>
+    <p class="dek">The end-to-end interaction between client, view layer, model validation, and notification/email services for booking, accepting, and declining an appointment.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="label">Project</span><span class="value">Solace Wellness Spot Scheduler</span></div>
+      <div class="meta-item"><span class="label">Diagram</span><span class="value">Sequence</span></div>
+      <div class="meta-item"><span class="label">Scope</span><span class="value">Booking &amp; Response Flow</span></div>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Overview</span>
+    <h2>Project Description</h2>
+    <div class="rule"></div>
+    <p>Solace Wellness Spot Scheduler is a Django web application that manages appointment booking for a wellness spa offering massage, acupuncture, facials, and yoga sessions. Bookings start in a <strong>pending</strong> state and only become <strong>confirmed</strong> once the assigned practitioner explicitly accepts them, which keeps the practitioner's real schedule authoritative rather than letting the client's action alone lock a slot. Every state change &mdash; a new request, an accept, a decline, a cancellation &mdash; produces both an in-app notification (polled every 10 seconds from the dashboard) and a console-simulated confirmation email.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Participants</span>
+    <h2>Sequence Participants</h2>
+    <div class="rule"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="role">Client</span>Customer booking the session.</div>
+      <div class="legend-item"><span class="role">Booking Page</span>Browser UI at <code>/book/</code>, polls slot availability via AJAX.</div>
+      <div class="legend-item"><span class="role">book_appointment view</span>Django view handling the POST submission.</div>
+      <div class="legend-item"><span class="role">Appointment model</span>Runs <code>clean()</code> validation: overlap, availability, service match.</div>
+      <div class="legend-item"><span class="role">Database</span>SQLite/Postgres persistence layer.</div>
+      <div class="legend-item"><span class="role">Notification + Email</span>In-app alert record and console email backend.</div>
+      <div class="legend-item"><span class="role">Practitioner</span>Reviews the pending request from their dashboard.</div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Diagram</span>
+    <h2>Booking &amp; Response Flow</h2>
+    <div class="rule"></div>
+    <figure class="plate">
+      <pre class="mermaid">
+sequenceDiagram
+    actor C as Client
+    participant UI as Booking Page
+    participant V as book_appointment view
+    participant M as Appointment model
+    participant DB as Database
+    participant N as Notification + Email
+    actor P as Practitioner
+
+    C->>UI: Choose service, practitioner, date
+    UI->>V: GET /api/slots/ (AJAX)
+    V->>DB: Query Availability + existing Appointments
+    DB-->>V: Open 30-min slots
+    V-->>UI: JSON slot list
+    UI-->>C: Render available times
+
+    C->>UI: Pick slot, submit booking form
+    UI->>V: POST /book/
+    V->>M: Create Appointment(status="pending")
+    M->>M: clean() validates overlap, availability, service match
+
+    alt Validation fails
+        M-->>V: ValidationError
+        V-->>UI: Re-render form with error
+        UI-->>C: Show validation message
+    else Validation passes
+        M->>DB: Save Appointment
+        V->>N: Notify practitioner + send confirmation emails
+        N->>DB: Save Notification record
+        V-->>UI: Redirect to dashboard, success message
+        UI-->>C: "Appointment booked" confirmation
+    end
+
+    Note over P: Pending request appears on Practitioner dashboard
+    P->>V: POST /appointment/&lt;id&gt;/accept/ or /decline/
+    V->>M: Update status to "confirmed" or "cancelled_by_practitioner"
+    M->>DB: Save updated Appointment
+    V->>N: Notify client of practitioner's decision
+    N->>DB: Save Notification record
+    V-->>P: Redirect to dashboard, success message
+    N-->>C: In-app + email notification of outcome
+      </pre>
+      <figcaption>Figure 1. Client-initiated booking through practitioner accept/decline, including validation and notification side effects.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Notes</span>
+    <h2>Key Behaviors</h2>
+    <div class="rule"></div>
+    <ol class="flow-notes">
+      <li>Slot availability is computed live from the practitioner's <code>Availability</code> blocks minus any non-cancelled overlapping appointments &mdash; nothing is pre-materialized.</li>
+      <li>An appointment is never saved without passing <code>clean()</code>, which checks: time ordering, no past-dated bookings, practitioner offers the service, the slot fits a working-hours block, and no double-booking.</li>
+      <li>A booking is only binding once the practitioner accepts it; declining or a later cancellation both notify the other party by in-app alert and email.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Solace Wellness Spot &mdash; Scheduling System</span>
+    <span>Sequence Diagram</span>
+  </footer>
+</div>

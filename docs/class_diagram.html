@@ -1,0 +1,198 @@
+<title>Solace Domain Model</title>
+<style>
+  :root {
+    --paper: #f5f7f4;
+    --surface: #ffffff;
+    --ink: #16211c;
+    --ink-soft: #4c5a53;
+    --ink-faint: #7c887f;
+    --gold: #96731a;
+    --sage: #3f6455;
+    --line: #dde2dc;
+    --plate-line: #cfd6cd;
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: 'Avenir Next', 'Century Gothic', 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0c1210;
+      --surface: #141c18;
+      --ink: #eef1ee;
+      --ink-soft: #a7b3ac;
+      --ink-faint: #78857e;
+      --gold: #d4af37;
+      --sage: #8da399;
+      --line: rgba(141, 163, 153, 0.18);
+      --plate-line: rgba(141, 163, 153, 0.28);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0c1210;
+    --surface: #141c18;
+    --ink: #eef1ee;
+    --ink-soft: #a7b3ac;
+    --ink-faint: #78857e;
+    --gold: #d4af37;
+    --sage: #8da399;
+    --line: rgba(141, 163, 153, 0.18);
+    --plate-line: rgba(141, 163, 153, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); line-height: 1.7; font-size: 16px; }
+
+  .page { max-width: 780px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+
+  .eyebrow { font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+
+  header.cover { padding-bottom: 2rem; margin-bottom: 2.75rem; border-bottom: 1px solid var(--line); }
+
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.9rem, 1.5rem + 1.4vw, 2.5rem); margin: 0.5rem 0 0.6rem; text-wrap: balance; color: var(--ink); }
+
+  .dek { font-size: 1.05rem; color: var(--ink-soft); max-width: 60ch; margin: 0 0 1.75rem; }
+
+  .meta-row { display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.82rem; }
+  .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+  .meta-item .label { text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); font-size: 0.68rem; }
+  .meta-item .value { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 2.75rem; }
+
+  h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; margin: 0 0 0.3rem; color: var(--ink); }
+  .section-eyebrow { display: block; margin-bottom: 0.35rem; }
+  h2 + .rule { height: 1px; background: linear-gradient(to right, var(--gold), var(--line) 40%); margin: 0.6rem 0 1.1rem; }
+
+  p { color: var(--ink-soft); margin: 0 0 1rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .plate { background: var(--surface); border: 1px solid var(--plate-line); border-radius: 8px; padding: 1.5rem; overflow-x: auto; }
+  .plate pre.mermaid { margin: 0; }
+
+  figcaption { font-size: 0.85rem; font-style: italic; color: var(--ink-faint); margin-top: 0.6rem; text-align: center; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 0.6rem 0.7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+  td.model-name { font-family: var(--font-mono); color: var(--sage); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+
+  footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--ink-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+  @media print {
+    body { background: #ffffff !important; color: #16211c !important; }
+    .plate { break-inside: avoid; border-color: #ccc !important; }
+    .page { padding: 0 0.25in; max-width: 100%; }
+  }
+</style>
+
+<div class="page">
+  <header class="cover">
+    <span class="eyebrow">SEN 310 &middot; Software Engineering &middot; UML Diagram</span>
+    <h1>Solace Domain Model</h1>
+    <p class="dek">The six core Django models &mdash; User, Service, Practitioner, Availability, Appointment, and Notification &mdash; and how they relate.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="label">Project</span><span class="value">Solace Wellness Spot Scheduler</span></div>
+      <div class="meta-item"><span class="label">Diagram</span><span class="value">Class</span></div>
+      <div class="meta-item"><span class="label">Source</span><span class="value">scheduler/models.py</span></div>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Overview</span>
+    <h2>Project Description</h2>
+    <div class="rule"></div>
+    <p>Solace Wellness Spot Scheduler is a Django web application that manages appointment booking for a wellness spa offering massage, acupuncture, facials, and yoga sessions. Its domain model centers on <code>Appointment</code>, which ties together a <code>Client</code> user, a <code>Practitioner</code> profile, and a <code>Service</code>, and enforces its own scheduling rules (no double-booking, must fit the practitioner's declared <code>Availability</code>, must match one of their specialties) inside a custom <code>clean()</code> method rather than at the database layer alone. A single custom <code>User</code> model carries a <code>role</code> field that distinguishes client, practitioner, and admin accounts throughout the app.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Diagram</span>
+    <h2>Class Relationships</h2>
+    <div class="rule"></div>
+    <figure class="plate">
+      <pre class="mermaid">
+classDiagram
+    class User {
+        +CharField username
+        +CharField email
+        +CharField role
+        +CharField phone_number
+        +get_full_name()
+        +__str__()
+    }
+
+    class Practitioner {
+        +TextField bio
+        +__str__()
+    }
+
+    class Service {
+        +CharField name
+        +TextField description
+        +int duration_minutes
+        +Decimal price
+        +__str__()
+    }
+
+    class Availability {
+        +int day_of_week
+        +TimeField start_time
+        +TimeField end_time
+        +clean()
+        +save()
+    }
+
+    class Appointment {
+        +DateField date
+        +TimeField start_time
+        +TimeField end_time
+        +CharField status
+        +TextField notes
+        +DateTimeField created_at
+        +clean()
+        +save()
+    }
+
+    class Notification {
+        +TextField message
+        +bool is_read
+        +DateTimeField created_at
+    }
+
+    User "1" --> "0..1" Practitioner : profile
+    User "1" --> "*" Appointment : books as client
+    User "1" --> "*" Notification : receives
+    Practitioner "1" --> "*" Availability : declares
+    Practitioner "1" --> "*" Appointment : fulfills
+    Practitioner "*" --> "*" Service : specialties
+    Service "1" --> "*" Appointment : booked for
+      </pre>
+      <figcaption>Figure 1. Domain model derived from scheduler/models.py, including cardinalities.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Reference</span>
+    <h2>Model Responsibilities</h2>
+    <div class="rule"></div>
+    <table>
+      <thead><tr><th>Model</th><th>Key Fields</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td class="model-name">User</td><td>role, phone_number</td><td>Extends Django's AbstractUser with a role flag (client / practitioner / admin) used across every view for access control.</td></tr>
+        <tr><td class="model-name">Practitioner</td><td>user (1:1), bio, specialties (M:M)</td><td>Staff profile linked one-to-one to a User account; specialties determine which services they can be booked for.</td></tr>
+        <tr><td class="model-name">Service</td><td>name, duration_minutes, price</td><td>Catalog entry for a bookable treatment; duration drives automatic end-time and slot-grid calculation.</td></tr>
+        <tr><td class="model-name">Availability</td><td>day_of_week, start_time, end_time</td><td>Recurring weekly working-hours block per practitioner; validates against overlapping blocks on save.</td></tr>
+        <tr><td class="model-name">Appointment</td><td>client, practitioner, service, date, status</td><td>The booking record. Its clean() method is the single source of truth for scheduling validity.</td></tr>
+        <tr><td class="model-name">Notification</td><td>user, message, is_read</td><td>In-app alert record polled by the dashboard bell icon every 10 seconds.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span>Solace Wellness Spot &mdash; Scheduling System</span>
+    <span>Class Diagram</span>
+  </footer>
+</div>

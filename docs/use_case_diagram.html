@@ -1,0 +1,334 @@
+<title>Solace Use Cases</title>
+<style>
+  :root {
+    --paper: #f5f7f4;
+    --surface: #ffffff;
+    --ink: #16211c;
+    --ink-soft: #4c5a53;
+    --ink-faint: #7c887f;
+    --gold: #96731a;
+    --sage: #3f6455;
+    --line: #dde2dc;
+    --plate-line: #cfd6cd;
+    --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: 'Avenir Next', 'Century Gothic', 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0c1210;
+      --surface: #141c18;
+      --ink: #eef1ee;
+      --ink-soft: #a7b3ac;
+      --ink-faint: #78857e;
+      --gold: #d4af37;
+      --sage: #8da399;
+      --line: rgba(141, 163, 153, 0.18);
+      --plate-line: rgba(141, 163, 153, 0.28);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0c1210;
+    --surface: #141c18;
+    --ink: #eef1ee;
+    --ink-soft: #a7b3ac;
+    --ink-faint: #78857e;
+    --gold: #d4af37;
+    --sage: #8da399;
+    --line: rgba(141, 163, 153, 0.18);
+    --plate-line: rgba(141, 163, 153, 0.28);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  header.cover {
+    padding-bottom: 2rem;
+    margin-bottom: 2.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 1.5rem + 1.4vw, 2.5rem);
+    margin: 0.5rem 0 0.6rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .dek {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0 0 1.75rem;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.82rem;
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+  .meta-item .label {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    font-size: 0.68rem;
+  }
+  .meta-item .value { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  section { margin-bottom: 2.75rem; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.35rem;
+    margin: 0 0 0.3rem;
+    color: var(--ink);
+  }
+
+  .section-eyebrow {
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  h2 + .rule {
+    height: 1px;
+    background: linear-gradient(to right, var(--gold), var(--line) 40%);
+    margin: 0.6rem 0 1.1rem;
+  }
+
+  p { color: var(--ink-soft); margin: 0 0 1rem; max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .actors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+  }
+
+  .actor-card {
+    background: var(--surface);
+    border: 1px solid var(--plate-line);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+  }
+
+  .actor-card .name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: var(--sage);
+    margin-bottom: 0.3rem;
+  }
+
+  .actor-card p { font-size: 0.9rem; margin: 0; }
+
+  .plate {
+    background: var(--surface);
+    border: 1px solid var(--plate-line);
+    border-radius: 8px;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .plate pre.mermaid { margin: 0; }
+
+  figcaption {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
+    text-align: center;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  th {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+
+  td.uc-name { font-family: var(--font-mono); color: var(--sage); white-space: nowrap; }
+  td { color: var(--ink-soft); }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media print {
+    body { background: #ffffff !important; color: #16211c !important; }
+    .plate, .actor-card { break-inside: avoid; border-color: #ccc !important; }
+    .page { padding: 0 0.25in; max-width: 100%; }
+  }
+</style>
+
+<div class="page">
+  <header class="cover">
+    <span class="eyebrow">SEN 310 &middot; Software Engineering &middot; UML Diagram</span>
+    <h1>Solace Use Cases</h1>
+    <p class="dek">Actors and system-level use cases for the Solace Wellness Spot appointment scheduler, derived directly from the application's URL routes and view logic.</p>
+    <div class="meta-row">
+      <div class="meta-item"><span class="label">Project</span><span class="value">Solace Wellness Spot Scheduler</span></div>
+      <div class="meta-item"><span class="label">Diagram</span><span class="value">Use Case</span></div>
+      <div class="meta-item"><span class="label">Framework</span><span class="value">Django 6.0</span></div>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Overview</span>
+    <h2>Project Description</h2>
+    <div class="rule"></div>
+    <p>Solace Wellness Spot Scheduler is a Django web application that manages appointment booking for a wellness spa offering massage, acupuncture, facials, and yoga sessions. It coordinates three roles &mdash; <strong>Client</strong>, <strong>Practitioner</strong>, and <strong>Admin/Manager</strong> &mdash; through role-specific dashboards. Clients browse services and book time slots that are validated in real time against a practitioner's declared weekly availability and existing bookings. Every appointment moves through a lifecycle (pending &rarr; confirmed/declined &rarr; completed/cancelled), with each transition triggering an in-app notification and an email. Admins get a reporting dashboard covering revenue, booking status breakdowns, and popular services, and can provision new practitioner accounts.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Participants</span>
+    <h2>Actors</h2>
+    <div class="rule"></div>
+    <div class="actors">
+      <div class="actor-card">
+        <div class="name">Client</div>
+        <p>A registered customer who browses services, checks live availability, books or cancels appointments, and tracks their upcoming and past sessions.</p>
+      </div>
+      <div class="actor-card">
+        <div class="name">Practitioner</div>
+        <p>Spa staff (therapist, esthetician, instructor) who defines weekly working hours, reviews incoming requests, and accepts, declines, or completes bookings.</p>
+      </div>
+      <div class="actor-card">
+        <div class="name">Admin / Manager</div>
+        <p>Business owner or manager who monitors revenue and booking metrics, and onboards new practitioner accounts with assigned specialties.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Diagram</span>
+    <h2>System Use Cases</h2>
+    <div class="rule"></div>
+    <figure class="plate">
+      <pre class="mermaid">
+flowchart LR
+    Client[Client]
+    Practitioner[Practitioner]
+    Admin[Admin / Manager]
+
+    subgraph SYS["Solace Wellness Spot &mdash; Scheduling System"]
+        UC1(["Register Account"])
+        UC2(["Log In / Log Out"])
+        UC3(["Browse Services"])
+        UC4(["Check Available Time Slots"])
+        UC5(["Book Appointment"])
+        UC6(["Cancel Appointment"])
+        UC7(["View Dashboard"])
+        UC8(["Receive Notifications"])
+        UC9(["Set Weekly Availability"])
+        UC10(["Accept / Decline Booking"])
+        UC11(["Mark Appointment Complete"])
+        UC12(["Create Practitioner Account"])
+        UC13(["View Business Reports"])
+    end
+
+    Client --> UC1
+    Client --> UC2
+    Client --> UC3
+    Client --> UC4
+    Client --> UC5
+    Client --> UC6
+    Client --> UC7
+    Client --> UC8
+
+    Practitioner --> UC2
+    Practitioner --> UC6
+    Practitioner --> UC7
+    Practitioner --> UC8
+    Practitioner --> UC9
+    Practitioner --> UC10
+    Practitioner --> UC11
+
+    Admin --> UC2
+    Admin --> UC7
+    Admin --> UC12
+    Admin --> UC13
+
+    UC5 -.includes.-> UC4
+      </pre>
+      <figcaption>Figure 1. Actors and their system-level use cases within the scheduling application boundary.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <span class="eyebrow section-eyebrow">Reference</span>
+    <h2>Use Case Descriptions</h2>
+    <div class="rule"></div>
+    <table>
+      <thead>
+        <tr><th>Use Case</th><th>Primary Actor</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="uc-name">Book Appointment</td><td>Client</td><td>Selects a service, practitioner, and open time slot; the system validates the slot against practitioner availability and existing bookings before creating a pending appointment.</td></tr>
+        <tr><td class="uc-name">Check Available Slots</td><td>Client</td><td>Fetches open 30-minute time slots for a given practitioner, service, and date via an AJAX endpoint, excluding past times and conflicts.</td></tr>
+        <tr><td class="uc-name">Accept / Decline Booking</td><td>Practitioner</td><td>Reviews a pending request and confirms or rejects it; the client is notified by in-app alert and email either way.</td></tr>
+        <tr><td class="uc-name">Set Weekly Availability</td><td>Practitioner</td><td>Defines recurring working-hour blocks per weekday, with overlap and ordering validation.</td></tr>
+        <tr><td class="uc-name">Cancel Appointment</td><td>Client / Practitioner</td><td>Either party cancels a booking; the other party is notified and the appointment status reflects who cancelled.</td></tr>
+        <tr><td class="uc-name">Create Practitioner Account</td><td>Admin</td><td>Provisions a new staff login and assigns which services they specialize in.</td></tr>
+        <tr><td class="uc-name">View Business Reports</td><td>Admin</td><td>Reviews total appointments, revenue, booking status breakdown, and top-performing services.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <span>Solace Wellness Spot &mdash; Scheduling System</span>
+    <span>Use Case Diagram</span>
+  </footer>
+</div>
